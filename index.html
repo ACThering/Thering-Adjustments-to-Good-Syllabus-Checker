@@ -525,7 +525,13 @@ const GRADING_SECTION_STOP_RE_KEEP_TOTAL = /(?:^|\n)[ \t]*(?:Course\s+Schedule|W
 // rubrics inline under each weight), and truncating anyway silently drops
 // later, real weight components from the sum.
 const GRADING_MAX_SECTION_CHARS = 20000;
-const RANGE_PCT_RE = /\d[\d.]*\s*[-–—]\s*\d[\d.]*\s*%/g;
+// Fixed 2026-09: letter-grade cutoff tables are often written with a % on
+// BOTH ends ("93.0% - 100.00%", "90.0% - 92.9%"), not "93.0 - 100%". The
+// original pattern required the first number to be bare, so none of those
+// ranges were excluded and the low end of each cutoff (93, 90, 87, …) was
+// added to the real assignment weights. CAS 198 Fall 2019 is 4 × 25% = 100%
+// plus those cutoffs → a false "does NOT sum to 100%" at ~880%.
+const RANGE_PCT_RE = /\d[\d.]*\s*%?\s*[-–—]\s*\d[\d.]*\s*%/g;
 const PCT_RE = /(\d{1,3}(?:\.\d+)?)\s?%/g;
 const GRADING_TOLERANCE = 2.0;
 
@@ -567,6 +573,10 @@ function checkGradingWeights(text) {
     const before = section.slice(Math.max(0, pm.index - 20), pm.index);
     const after = section.slice(pm.index + pm[0].length, pm.index + pm[0].length + 10);
     if (/^\s*[A-F][+-]?\b(?!\w)/.test(after)) continue;
+    // "93.0% - 100.00%" -- the low end of a cutoff range, not a weight.
+    // RANGE_PCT_RE should already have excluded this span; this is a
+    // belt-and-suspenders skip if the range matcher missed a variant.
+    if (/^\s*[-–—]\s*\d/.test(after)) continue;
     // A per-item breakdown of a component already counted, not a
     // separate additive component -- "each" can land on either side of
     // the percentage depending on phrasing ("12.5% each" vs. "each 4%").
