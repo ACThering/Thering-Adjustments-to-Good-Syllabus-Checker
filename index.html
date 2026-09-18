@@ -496,8 +496,13 @@ function checkSyllabus(text, levels, elements) {
 // alternative findGradingSection() returned null for them and neither
 // the percentage check nor the points-total check below could find
 // anything to scope their search to.
+// Fixed 2026-09 (3): a numbered section heading such as "9. Grading policy"
+// (CSE 410/510 Fall 2026) never matched, because the pattern required
+// "Grading" / "Grade Breakdown" to be the first word on the line (with
+// only an optional "Course " prefix). The optional leading "N." / "N)"
+// covers that numbered-heading style without loosening the rest.
 const GRADING_SECTION_START_RE =
-  /(?:^|\n)[ \t]*(?:(?:Course\s+)?(?:Grading(?:\s+Policy)?|Grade\s+Breakdown|Grading\s+Scale)\s*:?[ \t]*|Your\s+grades?\s+will\s+be\s+(?:determined|calculated)(?:\s+according\s+to\s+the\s+following)?(?:\s+formula)?\s*:?[ \t]*)/i;
+  /(?:^|\n)[ \t]*(?:(?:\d{1,2}(?:\.\d+)?\s*[.)]\s*)?(?:Course\s+)?(?:Grading(?:\s+Policy)?|Grade\s+Breakdown|Grading\s+Scale)\s*:?[ \t]*|Your\s+grades?\s+will\s+be\s+(?:determined|calculated)(?:\s+according\s+to\s+the\s+following)?(?:\s+formula)?\s*:?[ \t]*)/i;
 // A line-starting "Total" immediately followed (after any whitespace)
 // by a digit closes a weight/points table -- see grading_check.py's
 // SECTION_STOP_RE comment for the full CHE 412 / BIO 351 rationale
