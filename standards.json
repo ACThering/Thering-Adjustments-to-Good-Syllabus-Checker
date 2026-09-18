@@ -1,0 +1,465 @@
+{
+  "levels": [
+    "undergraduate",
+    "graduate"
+  ],
+  "elements": [
+    {
+      "id": "basic-information",
+      "title": "Basic Information",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Course subject code, course number, type of instruction (SEM/LEC/TUT/etc.), course title, class number, semester. (Undergrad page also files 'number of credits' here; grad page files it under Course Information instead -- same fact, different bucket, not a real conflict.)",
+      "detect": [
+        "\\bcredit(s)?\\b",
+        "\\b[A-Z]{2,4}\\s?\\d{3}\\b",
+        "\\b(fall|spring|summer|winter)\\s+20\\d{2}\\b",
+        "class number"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "course-information",
+      "title": "Course Information",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Date/time(s), delivery mode, number of credits (grad page is explicit that ranges should be included where applicable), instructor name and contact info (incl. office hours), other course staff (e.g. TAs) and their contact info.",
+      "detect": [
+        "office hours",
+        "instructor"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "course-description",
+      "title": "Course Description",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Official catalog course description (must match the catalog -- if outdated, that's fixed via the department scheduler, not just the syllabus text) and a clear statement of prerequisites.",
+      "detect": [
+        "course description",
+        "prerequisite"
+      ],
+      "texts": {},
+      "note": "Detection only confirms a description section exists -- it cannot verify the text actually matches the catalog description, or that prerequisites are stated, without reading it. Cross-check by hand against the catalog (e.g. via find_duplicate_courses.py check-text)."
+    },
+    {
+      "id": "course-materials",
+      "title": "Course Materials",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Required/recommended readings, resources, textbooks, citations, and where/how students access them.",
+      "detect": [
+        "textbook",
+        "reading",
+        "required text",
+        "course materials",
+        "resources"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "learning-outcomes",
+      "title": "Student Learning Outcomes",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Specific student-focused statements of what the student should know or be able to do by the end of the course, clearly linked to the program's own curriculum map/learning outcomes (in the syllabus itself, or via a link). Both pages describe this identically in substance (minor wording differences only).",
+      "detect": [
+        "\\bstudent\\s+learning\\s+outcomes?\\b",
+        "\\blearning\\s+outcomes?\\b",
+        "\\b(course|learning)\\s+(objectives?|goals?)\\b",
+        "\\bby\\s+the\\s+end\\s+of\\s+(this|the)\\s+course\\b"
+      ],
+      "texts": {
+        "undergraduate": [
+          "example",
+          "Learning outcomes for the course should be linked to the program's curriculum map. Whether these are called outcomes, goals or objectives, these are specific student-focused statements that specify what the student should be able to do or know upon completion of the course. Student learning outcomes should include objectives that delineate what the students should achieve from the course, and be clearly linked to the more expansive student learning outcomes of the degree program, either in the syllabus or via a link to a site that details how the course relates to the larger program-level goals."
+        ]
+      },
+      "note": ""
+    },
+    {
+      "id": "course-requirements",
+      "title": "Course Requirements",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Number of papers/tests/other graded requirements (homework, attendance, participation, etc.); assignment deadlines linked to the specific learning outcome(s) each one assesses. Grad page additionally asks that any extension policy be stated explicitly.",
+      "detect": [
+        "homework",
+        "assignment",
+        "course requirements",
+        "exam",
+        "project"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "classroom-environment",
+      "title": "Classroom Environment",
+      "levels": [
+        "graduate"
+      ],
+      "requirement": {
+        "graduate": "required"
+      },
+      "description": "GRADUATE-ONLY required section, no equivalent on the undergrad page: describe the strategies you'll use to create a classroom/online environment that aims to increase students' experience of being respected, seen, represented, and included.",
+      "detect": [
+        "classroom environment",
+        "\\binclusiv"
+      ],
+      "texts": {},
+      "note": "Required for graduate but not listed on the undergrad page."
+    },
+    {
+      "id": "grading-policy",
+      "title": "Grading Policy",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "How graded components combine into a final grade, relative weightings, a test make-up policy, the level of work required for each letter grade (or pass/fail), and a reminder of students' responsibility to participate in course evaluations. (The Incomplete Policy reference is a separate, dedicated element below -- split out because the two are governed by different, conflicting UB policies per level, and lumping them together obscured which specific part of a syllabus was actually missing.)",
+      "detect": [
+        "course evaluation",
+        "grade breakdown",
+        "grading scale",
+        "final grade scale",
+        "grade distribution",
+        "points each",
+        "grading policy",
+        "grading criteria",
+        "grade weight(ing)?",
+        "graded components"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "incomplete-policy",
+      "title": "Incomplete Policy",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "A reference to the correct Incomplete ('I' grade) Policy for students who cannot complete coursework by the end of the term. CONFLICT: undergraduate and graduate students are governed by two DIFFERENT Incomplete Policies at two different URLs; see `note`. Split out from Grading Policy (2026-09) since a syllabus can satisfy one without the other, and a single combined pass/fail flag couldn't say which.",
+      "detect": [
+        "incomplete.{0,20}(?:polic|grade)",
+        "(?:polic|grade).{0,20}incomplete"
+      ],
+      "texts": {
+        "undergraduate": [
+          "example",
+          "Reference to the university's Incomplete Policy (https://catalogs.buffalo.edu/content.php?catoid=21&navoid=1162#incomplete-grades) and any additional instructor requirements/comments regarding incomplete grades. The syllabus should also include a statement reminding students of their responsibility to participate in the course evaluation process."
+        ],
+        "graduate": [
+          "example",
+          "Reference to the university's Graduate Incomplete Policy (https://www.buffalo.edu/grad/succeed/current-students/policy-library.html#i-grade) and any additional requirements/preferences regarding incomplete grades. The syllabus should also include a statement reminding students of their responsibility to participate in the course evaluation process. (The grad page also offers optional Graduate Grade Options / Incomplete Grade Options tables -- S/U, F1/F2/F3, I/-prefixed grades -- for courses that use them.)"
+        ]
+      },
+      "note": "CONFLICT: for a combined UG/grad course, undergraduate students are bound by the Undergraduate Incomplete Policy and graduate students by the (different) Graduate Incomplete Policy -- a syllabus serving both populations likely needs to reference BOTH, not just one."
+    },
+    {
+      "id": "academic-content",
+      "title": "Academic Content / Weekly Course Schedule",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "optional"
+      },
+      "description": "What students are accountable for (readings, lectures, etc.) and assignment deadlines. REQUIRED on the undergrad page (must cover all 15 weeks); merely suggested as an OPTIONAL 'Weekly Course Schedule' on the grad page. Required for this combined course either way, by the superset rule.",
+      "detect": [
+        "course schedule",
+        "week\\s*1\\b[\\s\\S]*week\\s*1[0-5]\\b",
+        "\\b\\d{1,2}/\\d{1,2}\\b[\\s\\S]*\\d{1,2}/\\d{1,2}\\b"
+      ],
+      "texts": {},
+      "note": "Required on undergrad page, only optional on grad page -- not a real conflict, just an asymmetric floor."
+    },
+    {
+      "id": "academic-integrity",
+      "title": "Academic Integrity",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "CONFLICT: the undergrad page only offers non-binding example wording pointing at the Undergraduate Academic Integrity Policy. The graduate page states specific text 'must be included', pointing at a DIFFERENT policy, the Graduate Academic Integrity policy. See `note`.",
+      "detect": [
+        "academic integrity"
+      ],
+      "texts": {
+        "undergraduate": [
+          "example",
+          "Students must be familiar with and abide by the university's policies and procedures on Academic Integrity, available at the following link: Academic Integrity Policy (https://catalogs.buffalo.edu/content.php?catoid=21&navoid=1162#preamble)."
+        ],
+        "graduate": [
+          "verbatim-required",
+          "Academic integrity is a fundamental university value. Through the honest completion of academic work, students sustain the integrity of the university and of themselves while facilitating the university's imperative for the transmission of knowledge and culture based upon the generation of new and innovative ideas. For more information, please refer to the Graduate Academic Integrity policy (https://www.buffalo.edu/grad/succeed/current-students/policy-library.html#academic-integrity). Please also include any additional instructor, programmatic, departmental or decanal level requirements regarding academic dishonesty, as applicable."
+        ]
+      },
+      "note": "CONFLICT: these are two different policy documents (Undergraduate vs. Graduate Academic Integrity Policy), not just two phrasings of the same one -- undergraduate students in this course are bound by the first, graduate students by the second. A combined syllabus likely needs to reference/include both, not pick one."
+    },
+    {
+      "id": "accessibility-resources",
+      "title": "Accessibility Resources",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "required",
+        "graduate": "required"
+      },
+      "description": "Both pages mandate exact verbatim text here, and both versions name the same office/room/phone/policy -- the undergrad version is a strict superset (it adds one extra sentence pointing to the Accessibility Resources website; the grad version omits that sentence but has no content the undergrad version lacks). Low-severity, probably not a real conflict: the undergrad text likely already satisfies the grad requirement too.",
+      "detect": [
+        "office of accessibility resources",
+        "accessibility resources"
+      ],
+      "texts": {
+        "undergraduate": [
+          "verbatim-required",
+          "If you have any disability that requires reasonable accommodations to enable you to participate in this course, please contact the Office of Accessibility Resources in 60 Capen Hall at 716-645-2608 and the instructor of this course during the first week of class. The office will provide you with information and review appropriate arrangements for reasonable accommodations, as outlined on the Accessibility Resources website (http://www.buffalo.edu/studentlife/who-we-are/departments/accessibility.html)."
+        ],
+        "graduate": [
+          "verbatim-required",
+          "If you have any disability which requires reasonable accommodations to enable you to participate in this course, please contact the Office of Accessibility Resources in 60 Capen Hall, 716-645-2608 and also the instructor of this course during the first week of class. The office will provide you with information and review appropriate arrangements for reasonable accommodations."
+        ]
+      },
+      "note": "Low-severity: wording differs but the undergrad text is a superset of the grad text's content (same office/room/phone/policy, plus one extra sentence) -- using the undergrad version for both populations is defensible, unlike the academic-integrity conflict above where the two texts point at genuinely different policy documents."
+    },
+    {
+      "id": "attendance-policy",
+      "title": "Attendance Policy",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional",
+        "graduate": "optional"
+      },
+      "description": "Religious observances, athletic commitments, family/work obligations, course cancellation/emergency planning (UB Alert / emergency webpage).",
+      "detect": [
+        "attendance"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "instructor-support-staff-info",
+      "title": "Instructor and Course Support Staff Information",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional",
+        "graduate": "optional"
+      },
+      "description": "Teaching philosophy; roles/responsibilities of TAs/GAs etc.",
+      "detect": [
+        "teaching assistant",
+        "\\bTA\\b"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "protecting-course-materials",
+      "title": "Protecting Course Materials Disclaimer",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional",
+        "graduate": "optional"
+      },
+      "description": "Both pages give ready-to-use suggested text; the graduate version is longer (references the Graduate School's own Improper Distribution of Course Materials policy and an 'educational sanction' consequence not mentioned on the undergrad page).",
+      "detect": [
+        "prior written permission",
+        "photograph.{0,20}record.{0,20}reproduce"
+      ],
+      "texts": {
+        "undergraduate": [
+          "example",
+          "All materials prepared and/or assigned by me for this course are for the students' educational benefit. Other than for permitted collaborative work, students may not photograph, record, reproduce, transmit, distribute, upload, sell or exchange course materials without my prior written permission. \u201cCourse materials\u201d include, but are not limited to, all instructor-prepared and assigned materials, such as lectures; lecture notes; discussion prompts; study aids; tests and assignments; and presentation materials such as PowerPoint slides, Prezi slides, or transparencies; and course packets or handouts. Public distribution of such materials may also constitute copyright infringement under federal or state law. Violation of this policy may additionally subject a student to a finding of \u201cacademic dishonesty\u201d under the Academic Integrity Policy and/or disciplinary charges under the Student Code of Conduct."
+        ],
+        "graduate": [
+          "example",
+          "All materials prepared and/or assigned by me for this course are for the students' educational benefit. Other than for permitted collaborative work, students may not photograph, record, reproduce, transmit, distribute, upload, sell or exchange course materials, without my prior written permission. \u201cCourse materials\u201d include, but are not limited to, all instructor-prepared and assigned materials, such as lectures; lecture notes; discussion prompts; study aids; tests and assignments; and presentation materials such as PowerPoint slides, or transparencies; and course packets or handouts. Public distribution of such materials may also constitute copyright infringement in violation of federal or state law. Students who violate this policy will be required to complete an educational sanction about the value of intellectual property. More serious and/or repeat violations of this policy may be treated as acts of \u201cacademic dishonesty\u201d and/or subject a student to disciplinary charges under the Student Code of Conduct."
+        ]
+      },
+      "note": "Optional either way -- if adopted for a combined course, the graduate version's extra sanction language is the safer/more complete choice."
+    },
+    {
+      "id": "lab-safety",
+      "title": "Lab Safety",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional",
+        "graduate": "optional"
+      },
+      "description": "Lab safety guidelines/policies/procedures, where relevant.",
+      "detect": [
+        "lab safety",
+        "safety guidelines",
+        "safety procedures",
+        "\\bPPE\\b",
+        "laboratory safety"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "classroom-decorum",
+      "title": "Classroom Decorum",
+      "levels": [
+        "undergraduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional"
+      },
+      "description": "Expectations re: tardiness, cell phones, laptops, etc. Undergrad-page-only; no equivalent optional section on the grad page.",
+      "detect": [
+        "classroom decorum",
+        "cell phone",
+        "\\blaptop"
+      ],
+      "texts": {},
+      "note": ""
+    },
+    {
+      "id": "critical-campus-resources",
+      "title": "Critical Campus Resources / University Support Services",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional",
+        "graduate": "optional"
+      },
+      "description": "Counseling/Health Services/Health Promotion contact info, plus a Title IX / sexual-violence-resources statement. The graduate version includes an ADDITIONAL paragraph the undergrad version lacks: a disclosure that UB faculty are mandated reporters for sex/gender-based violence or harassment.",
+      "detect": [
+        "counseling services",
+        "title ix"
+      ],
+      "texts": {
+        "undergraduate": [
+          "example",
+          "Students may experience a range of issues that can cause barriers to learning or reduce their ability to participate in daily activities. These might include strained relationships, anxiety, high levels of stress, alcohol/drug problems, feeling down, health concerns or unwanted sexual experiences. Counseling, Health Services, and Health Promotion are here to help with these concerns and others. Students can learn more about these programs and services by contacting: Counseling Services, 120 Richmond Quad (North Campus), 716-645-2720 and 1st Floor Michael Hall (South Campus), 716-829-5800; Student Health Services, 4350 Maple Rd, Amherst, NY 14226, 716-829-3316; Health Promotion, 114 Student Union (North Campus), 716-645-2837.\n\nSexual Violence: UB is committed to providing a safe learning environment free of all forms of discrimination and sexual harassment, including sexual assault, domestic and dating violence and stalking. If a student has experienced gender-based violence (i.e., intimate partner violence, attempted or completed sexual assault, harassment, coercion, stalking, etc.), UB has resources to help. This includes academic accommodations, health and counseling services, housing accommodations, assistance with legal protective orders, and assistance with reporting the incident to the police or other UB officials, if the student so chooses. Contact UB's Title IX Coordinator at 716-645-2266 for more information. For confidential assistance, students may also contact a Crisis Services Campus Advocate at 716-796-4399."
+        ],
+        "graduate": [
+          "example",
+          "As a student you may experience a range of issues that can cause barriers to learning or reduce your ability to participate in daily activities. These might include strained relationships, anxiety, high levels of stress, alcohol/drug problems, feeling down, health concerns, or unwanted sexual experiences. Counseling, Health Services and Health Promotion are here to help. Counseling Services: 120 Richmond Quad (North Campus), 716-645-2720, 202 Michael Hall (South Campus), 716-829-5800. Health Services: 4350 Maple Rd, Amherst, NY 14226, 716-829-3316. Office of Health Promotion: 114 Student Union (North Campus), 716-645-2837.\n\nSexual Violence: UB is committed to providing a safe learning environment free of all forms of discrimination and sexual harassment, including sexual assault, domestic and dating violence and stalking. If you have experienced gender-based violence ..., UB has resources to help ... Please contact UB's Title IX Coordinator at 716-645-2266 for more information. For confidential assistance, you may also contact a Crisis Services Campus Advocate at 716-796-4399.\n\nPlease be aware UB faculty are mandated to report violence or harassment on the basis of sex or gender. This means that if you tell me about a situation, I will need to report it to the Office of Equity, Diversity and Inclusion. You will still have options about how the situation will be handled, including whether or not you wish to pursue a formal complaint. Please know that if you do not wish to have UB proceed with an investigation, your request will be honored unless UB's failure to act does not adequately mitigate the risk of harm to you or other members of the university community. You also have the option of speaking with trained counselors who can maintain complete confidentiality. You may call UB's Office of Equity, Diversity and Inclusion at 716-645-2266 for more information, and you have the option of calling that office anonymously if you would prefer not to disclose your identity."
+        ]
+      },
+      "note": "Optional either way, but if adopted for a combined course, use the graduate version -- it's a strict superset (same core content plus the mandated-reporter disclosure the undergrad version omits)."
+    },
+    {
+      "id": "generative-ai-tools",
+      "title": "Generative AI Tools (e.g., ChatGPT)",
+      "levels": [
+        "undergraduate",
+        "graduate"
+      ],
+      "requirement": {
+        "undergraduate": "optional",
+        "graduate": "optional"
+      },
+      "description": "Both pages encourage instructors to state clear, specific expectations; both offer a 'strictly forbidden' example and a 'limited use' example, but the grad page's limited-use example is more specific (differentiates tests/papers from homework).",
+      "detect": [
+        "generative ai"
+      ],
+      "texts": {
+        "undergraduate": [
+          "example",
+          "Prohibition example: Utilizing generative AI tools (such as ChatGPT) in this class is strictly forbidden. Any use of generative AI tools in this class will be considered a violation of UB's Academic Integrity policies (https://www.buffalo.edu/academic-integrity/policies.html). However, you are free to use AI tools that are not generative, such as spellcheckers and auto-annotation (e.g., EndNote), to assist in making your writing more professional. Please email me if you have any questions.\n\nLimited use: if you intend to allow some use of generative AI tools, indicate the specific assignments where it is (or isn't) allowable and which specific tools are allowed."
+        ],
+        "graduate": [
+          "example",
+          "Prohibition example: Utilizing generative AI tools (such as ChatGPT) in this class is strictly forbidden. Any use of generative AI tools in this class will be considered a violation of UB's Academic Integrity policies. However, you are free to use AI tools (that are not generative) such as spellcheckers and auto-annotation, to assist in making your writing more professional.\n\nLimited use example: using generative AI tools such as ChatGPT is not allowed during any tests, or for any help in generating both your final term paper and your online discussion comments. However, you are free to use generative AI tools such as ChatGPT when completing homework assignments. In addition, you are free to use AI tools (that are not generative) such as spellcheckers, formatting designers, and auto-annotation, etc."
+        ]
+      },
+      "note": "Optional either way -- differing examples, not a conflict; pick/blend whichever framing fits the course."
+    },
+    {
+      "id": "technology-recommendations",
+      "title": "Technology Recommendations",
+      "levels": [
+        "graduate"
+      ],
+      "requirement": {
+        "graduate": "optional"
+      },
+      "description": "GRADUATE-ONLY optional section, no equivalent on the undergrad page: minimum hardware/software recommended for the course's delivery mode (webcam, broadband, etc.), plus space for course-specific technology requirements.",
+      "detect": [
+        "webcam",
+        "broadband",
+        "technology requirements",
+        "hardware requirements",
+        "software requirements",
+        "minimum requirements"
+      ],
+      "texts": {},
+      "note": "Graduate-page-only; no undergrad equivalent."
+    }
+  ]
+}

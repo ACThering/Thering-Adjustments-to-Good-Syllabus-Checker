@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UB Syllabus Compliance Checker</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ub-blue: #005bbb;
+    --ub-blue-dark: #003d80;
+    --text: #1a1a1a;
+    --muted: #555555;
+    --border: #d5dbe2;
+    --bg-tint: #f4f7fb;
+    --bad: #a6011a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background: #ffffff;
+    line-height: 1.5;
+  }
+  a { color: var(--ub-blue-dark); }
+  header {
+    background: var(--ub-blue);
+    color: #ffffff;
+    padding: 1.5rem 1rem;
+  }
+  header .wrap { max-width: 860px; margin: 0 auto; }
+  header h1 { margin: 0 0 0.35rem 0; font-size: 1.5rem; }
+  header p { margin: 0; font-size: 0.95rem; }
+  main { max-width: 860px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  section { margin-top: 1.75rem; }
+  h2 { color: var(--ub-blue-dark); border-bottom: 2px solid var(--border); padding-bottom: 0.3rem; font-size: 1.25rem; }
+  h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+  fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem 1rem; margin: 0 0 1rem 0; }
+  legend { font-weight: bold; padding: 0 0.4rem; }
+  label { display: inline-flex; align-items: center; gap: 0.4rem; margin-right: 1.25rem; }
+  input[type="file"] {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0.5rem 0 1rem 0;
+    padding: 1.5rem 1rem;
+    border: 2px dashed var(--ub-blue);
+    border-radius: 8px;
+    background: var(--bg-tint);
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  input[type="file"]:hover { background: #e9f0f8; }
+  input[type="file"]:focus-visible { outline: 3px solid var(--ub-blue-dark); outline-offset: 2px; }
+  input[type="file"]::file-selector-button,
+  input[type="file"]::-webkit-file-upload-button {
+    background: var(--ub-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.1rem;
+    font-size: 1rem;
+    margin-right: 1rem;
+    cursor: pointer;
+  }
+  input[type="file"]::file-selector-button:hover,
+  input[type="file"]::-webkit-file-upload-button:hover { background: var(--ub-blue-dark); }
+  button {
+    background: var(--ub-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button:hover, button:focus-visible { background: var(--ub-blue-dark); }
+  button:disabled { background: #9aa7b4; cursor: not-allowed; }
+  button.secondary { background: #ffffff; color: var(--ub-blue-dark); border: 2px solid var(--ub-blue); }
+  button.secondary:hover, button.secondary:focus-visible { background: var(--bg-tint); }
+  #status { margin-top: 0.75rem; font-weight: bold; min-height: 1.2em; }
+  #status[data-state="error"] { color: var(--bad); }
+  table.summary-table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
+  table.summary-table caption { text-align: left; font-weight: bold; margin-bottom: 0.4rem; }
+  table.summary-table th, table.summary-table td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.65rem;
+    text-align: left;
+  }
+  table.summary-table th { background: var(--bg-tint); }
+  .course-block { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; background: #fdfefe; }
+  .page-info { color: var(--muted); font-style: italic; margin-top: -0.4rem; }
+  ul.finding-list { padding-left: 1.4rem; }
+  ul.finding-list li { margin-bottom: 0.35rem; }
+  .count-tag { color: var(--muted); font-style: italic; }
+  details.about { border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 1rem; }
+  details.about summary { cursor: pointer; font-weight: bold; }
+  details.about ul { padding-left: 1.3rem; }
+  footer { max-width: 860px; margin: 0 auto; padding: 1rem; color: var(--muted); font-size: 0.85rem; }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>UB Syllabus Compliance Checker</h1>
+    <p>Checks a graduate course-approval PDF against UB's syllabus policy elements and a lightweight PDF accessibility screen — entirely in your browser.</p>
+  </div>
+</header>
+
+<main>
+  <section id="privacy-note">
+    <p><strong>Nothing you upload leaves your computer.</strong> This page runs entirely in your browser (no server, no upload) — the PDF is read locally by your browser's own JavaScript engine.</p>
+  </section>
+
+  <section id="upload-section">
+    <h2>Check a syllabus</h2>
+    <form id="check-form">
+      <div>
+        <label for="file-input" style="display:block; font-weight:bold; margin-bottom:0.3rem;">
+          Syllabus file(s) — PDF (cover form + syllabus) or .docx
+        </label>
+        <input type="file" id="file-input" aria-describedby="file-input-help" accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple>
+        <p id="file-input-help" style="margin: -0.75rem 0 1rem 0; color: var(--muted); font-size: 0.9rem;">Click to browse, or drag and drop files here. Multiple files OK.</p>
+      </div>
+
+      <fieldset>
+        <legend>Which UB policy level(s) apply?</legend>
+        <label style="display:block; margin-bottom:0.4rem;">
+          <input type="radio" name="level-mode" id="level-mode-auto" value="auto" checked>
+          Detect automatically from the course number (recommended) — e.g. BIO 351 → undergraduate, EVS 518 → graduate, EVS 418/518 → both
+        </label>
+        <label style="display:block;">
+          <input type="radio" name="level-mode" id="level-mode-manual" value="manual">
+          Choose manually for all files
+        </label>
+        <div id="manual-levels" style="margin: 0.5rem 0 0 1.6rem;" hidden>
+          <label><input type="checkbox" id="level-undergraduate"> Undergraduate</label>
+          <label><input type="checkbox" id="level-graduate" checked> Graduate</label>
+        </div>
+      </fieldset>
+
+      <button type="submit" id="check-btn">Check syllabus(es)</button>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="results-section" hidden aria-live="polite">
+    <!-- populated by JS -->
+  </section>
+
+  <section>
+    <details class="about">
+      <summary>About this tool &amp; its limitations</summary>
+      <p>
+        This checks syllabus content against UB's official
+        <a href="https://undergrad.buffalo.edu/faculty-staff-pw/curriculum/syllabus.html">undergraduate</a>
+        and
+        <a href="https://www.buffalo.edu/grad/intranet/curriculum/course-creation/syllabus-guidelines.html">graduate</a>
+        syllabus policy pages. Accepts PDF (a plain syllabus, or a Graduate
+        School course-approval packet — it automatically detects and
+        excludes the "New Graduate Course Approval Request Form" cover
+        pages if present) or .docx.
+      </p>
+      <p><strong>Grading Weight Check:</strong> if a "Grading" section states
+      percentage-based weights (e.g. "Exams: 60%, Homework: 20%, Participation: 20%"),
+      this adds them up and flags it if they don't sum to ~100%. Deliberately
+      scoped to the located Grading section only, not the whole document —
+      a whole-document scan picks up unrelated percentages (attendance bonus
+      thresholds, late-submission penalties, a Final Grade Scale's cutoff
+      ranges) that would otherwise produce a confidently wrong total. Reports
+      "n/a" for a points-based breakdown (no percentages to check) or when no
+      "Grading" heading can be found at all. A grading table that reconciles
+      to 100% here also counts as positive evidence for the separate "Grading
+      Policy" required-element check below, even when no specific phrase like
+      "course evaluation" or "grade breakdown" is present.</p>
+      <p><strong>Points Total Check:</strong> the same idea for a points-based
+      breakdown, since UB does not require percentage-based grading. If the
+      grading section states a grand total (e.g. "Total points: 100") this
+      adds up the listed point values and flags it if they don't match. A
+      per-item rate like "3 points each" is not counted on its own, but a
+      restated line subtotal like "(30 points total)" is. Reports "n/a" for a
+      percentage-based breakdown or when no stated point total can be found —
+      a syllabus is never flagged just for grading by points instead of
+      percentages, or vice versa. A points table that reconciles here also
+      counts as positive evidence for the "Grading Policy" required-element
+      check, the same as a reconciled percentage table does.</p>
+      <p><strong>"Grading Policy" and "Incomplete Policy" are two separate checks</strong>,
+      not one — the two are governed by different, sometimes conflicting UB
+      policies per level, and lumping them into a single pass/fail flag made
+      it unclear which part of a syllabus was actually missing.</p>
+      <p><strong>Course Code Format is informational only, never a compliance flag:</strong>
+      if the syllabus doesn't state the precise official subject code + instruction-type
+      abbreviation (e.g. "HIS 484 SEM") — only a spelled-out equivalent like "HISTORY 484,
+      SEMINAR" — this notes it as a heads-up to verify against the catalog listing, without
+      counting it as a missing required element.</p>
+      <p><strong>Which policy level applies (undergraduate/graduate) is auto-detected</strong>
+      from the course number stated on the syllabus's first page, per UB's own numbering
+      convention (100–499 undergraduate, 500+ graduate) — a dual-listed course
+      (e.g. "EVS 418/518") is checked against both. If no recognizable course number
+      is found, both levels are checked rather than guessing one. Switch to "Choose
+      manually" if this gets it wrong for an unusually formatted syllabus.</p>
+      <p><strong>This is a heuristic gap-flagger, not an authoritative compliance determination.</strong>
+      A "detected" element may be a false match; a "missing" one may just be phrased unexpectedly.
+      Always read the flagged section of the real document before acting on a finding.</p>
+      <p><strong>The accessibility check only applies to PDF uploads</strong> — PDF/UA is a
+      PDF-specific standard, so a .docx file has nothing to check this way; export it to PDF
+      first if you need this part. Even for a PDF, this check is deliberately degraded compared
+      to the full desktop version of this tool (which uses veraPDF's authoritative PDF/UA-1 /
+      ISO 14289-1 validator). This browser-only version can only check, using the PDF's own
+      tag structure where present:</p>
+      <ul>
+        <li>Whether the PDF is flagged as a tagged PDF at all</li>
+        <li>Whether the document has a title set in its metadata</li>
+        <li>Whether the document appears to declare a language (approximate, byte-level check)</li>
+        <li>Images/figures with no alt-text description</li>
+        <li>Hyperlinks with no accessible description text</li>
+        <li>Tables with inconsistent row/column structure</li>
+      </ul>
+      <p>It does <strong>not</strong> check font embedding, table header scope attributes, or
+      full per-element tagging coverage the way the desktop veraPDF-based tool does. Treat a
+      clean result here as "no obvious problems found," not "accessible."</p>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <p>Client-side only — built with <a href="https://mozilla.github.io/pdf.js/">pdf.js</a>,
+  <a href="https://docx.js.org/">docx.js</a>, and
+  <a href="https://github.com/mwilliamson/mammoth.js">mammoth.js</a>. Source: UB Academic Affairs internal tooling.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script type="module">
+// mammoth.js above is a classic (non-module) UMD script that sets
+// window.mammoth -- a module script can still read it, since `type=module`
+// only isolates the module's own top-level scope, not the shared `window`.
+const mammoth = window.mammoth;
+import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.mjs";
+import {
+  Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow,
+  TableCell, WidthType, AlignmentType,
+} from "https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.mjs";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs";
+
+const fileInput = document.getElementById("file-input");
+const form = document.getElementById("check-form");
+const checkBtn = document.getElementById("check-btn");
+const statusEl = document.getElementById("status");
+const resultsSection = document.getElementById("results-section");
+const manualLevelsDiv = document.getElementById("manual-levels");
+
+for (const radio of document.querySelectorAll('input[name="level-mode"]')) {
+  radio.addEventListener("change", () => {
+    manualLevelsDiv.hidden = document.getElementById("level-mode-manual").checked === false;
+  });
+}
+
+let standardsCache = null;
+let lastCourses = null;
+
+function setStatus(msg, isError) {
+  statusEl.textContent = msg;
+  statusEl.dataset.state = isError ? "error" : "ok";
+}
+
+async function loadStandards() {
+  if (!standardsCache) {
+    const res = await fetch("standards.json");
+    if (!res.ok) throw new Error("Could not load standards.json (" + res.status + ")");
+    standardsCache = await res.json();
+  }
+  return standardsCache;
+}
+
+// ---- Cover-form boundary detection, ported from pdf_extract.py ----
+const FORM_TITLE_MARKER = "new graduate course approval request form";
+const FORM_SECTION_MARKERS = [
+  FORM_TITLE_MARKER,
+  "basic catalog information",
+  "description for hub catalog",
+  "duplication check:",
+  "cross-listing/dual listing",
+  "student learning outcomes (slos): please list",
+  "generative ai tools: please include a",
+  "academic department approval:",
+  "academic dean approval:",
+  "the graduate school:",
+  "action of divisional/area committee",
+];
+
+function isFormPage(text) {
+  const lower = text.toLowerCase();
+  return FORM_SECTION_MARKERS.some((m) => lower.includes(m));
+}
+
+function findSyllabusStartPage(pages) {
+  if (!pages.length || !pages[0].toLowerCase().includes(FORM_TITLE_MARKER)) return 0;
+  let i = 0;
+  while (i < pages.length && isFormPage(pages[i])) i++;
+  return i;
+}
+
+// ---- PDF text extraction via pdf.js ----
+// Fixed 2026-09: the previous version joined every text item with an
+// unconditional space. That is wrong whenever a PDF renders a heading
+// with a stylized first letter per word (a common small-caps/drop-cap
+// treatment for section headings) -- pdf.js then hands back the drop
+// cap and the rest of the word as two separate items with zero real
+// gap between them, e.g. "C" and "OURSE". Joining those with a forced
+// space produced "C OURSE D ESCRIPTION" for a heading that reads
+// "COURSE DESCRIPTION" on the page, which silently defeats every
+// literal-substring detect pattern in standards.json -- the phrase
+// never appears anywhere in the extracted text, no matter how many
+// keyword variants the pattern list has. Real syllabus, real failure:
+// see the 2026-09 test notes.
+//
+// Fix: use each item's own position (pdf.js gives us this for free) to
+// decide whether a space belongs between it and the previous item,
+// instead of always inserting one. Two items with (approximately) no
+// horizontal gap are glued directly -- this is what correctly turns
+// "C" + "OURSE" back into "COURSE". Two items on different lines (a
+// meaningful vertical position change) get a real newline instead of a
+// space, which also restores the line-start anchor that
+// findGradingSection's heading regex depends on and which silently
+// never matched anything under the old one-line-per-page join.
+async function loadPdfPages(arrayBuffer) {
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    // Zero-width/empty items carry no text and only confuse the gap
+    // math below (pdf.js emits some of these purely as internal line
+    // markers) -- drop them before reconstructing the line.
+    const items = content.items.filter((it) => it.str && it.str.length > 0);
+    let out = "";
+    let prev = null;
+    for (const item of items) {
+      if (prev) {
+        // transform[5] is the item's baseline y-position. A same-line
+        // run of text keeps (approximately) the same baseline; a
+        // meaningfully different one means pdf.js moved to a new
+        // visual line, which the old code threw away entirely.
+        const sameLine = Math.abs(item.transform[5] - prev.transform[5]) < 2;
+        if (!sameLine) {
+          out += "\n";
+        } else {
+          const prevEndX = prev.transform[4] + (prev.width || 0);
+          const curStartX = item.transform[4];
+          const gap = curStartX - prevEndX;
+          // transform[2]/[3] give the glyph's rendered height, a proxy
+          // for font size, so the "is this a real space" threshold
+          // scales with whatever size the current run happens to be.
+          const fontH = Math.hypot(item.transform[2], item.transform[3]) || 10;
+          const alreadyWhitespace = /\s$/.test(prev.str) || /^\s/.test(item.str);
+          if (!alreadyWhitespace && gap > fontH * 0.12) {
+            out += " ";
+          }
+        }
+      }
+      out += item.str;
+      prev = item;
+    }
+    // Collapse only horizontal whitespace runs; a real newline from the
+    // logic above is left alone rather than flattened like before.
+    pages.push(out.replace(/[ \t]+/g, " "));
+  }
+  return { pdf, pages };
+}
+
+// ---- Course-level auto-detection, ported from level_detection.py ----
+// UB numbering convention: 100-499 undergraduate, 500+ graduate. Scoped
+// to the first syllabus page (plus the uploaded filename, which this
+// workflow's real samples always name with the course's abbreviated
+// subject code even when the document body spells it out in full) --
+// see level_detection.py's docstring for why (avoids picking up an
+// unrelated course number mentioned deep in a prerequisites section or
+// reading list). The 2-15 letter prefix bound (not a real UB subject
+// code's usual 2-5) is wide enough to also catch a fully spelled-out
+// ALL-CAPS subject name ("HISTORY 484") -- found for real in a syllabus
+// this otherwise missed entirely.
+const COURSE_NUMBER_RE = /\b([A-Z]{2,15})\s?(\d{3})(?:\s*\/\s*(\d{3}))?\b/g;
+
+function detectCourseLevels(firstPageText, filename) {
+  const candidateText = filename ? `${filename}\n${firstPageText}` : firstPageText;
+  const re = new RegExp(COURSE_NUMBER_RE.source, "g");
+  const codes = [];
+  const numbers = [];
+  let m;
+  while ((m = re.exec(candidateText)) !== null) {
+    const code = m[0].trim();
+    if (!codes.includes(code)) codes.push(code);
+    numbers.push(parseInt(m[2], 10));
+    if (m[3]) numbers.push(parseInt(m[3], 10));
+  }
+  const hasUG = numbers.some((n) => n >= 100 && n <= 499);
+  const hasGrad = numbers.some((n) => n >= 500);
+  if (hasUG && hasGrad) {
+    return {
+      levels: ["undergraduate", "graduate"],
+      reason: `Dual-listed course number(s) detected (${codes.join(", ")}) — checking both levels.`,
+    };
+  }
+  if (hasUG) {
+    return { levels: ["undergraduate"], reason: `Undergraduate course number detected (${codes.join(", ")}).` };
+  }
+  if (hasGrad) {
+    return { levels: ["graduate"], reason: `Graduate course number detected (${codes.join(", ")}).` };
+  }
+  return {
+    levels: ["undergraduate", "graduate"],
+    reason: "No course number detected — checked against both levels.",
+  };
+}
+
+// ---- Precise course-code format check, ported from course_code_check.py ----
+// Informational only -- never affects whether anything counts as
+// "missing." A spelled-out subject/type ("HISTORY 484, SEMINAR")
+// instead of the precise official code ("HIS 484 SEM") is a stylistic
+// variation, not a compliance gap, per Jeff's own call (2026-09).
+const INSTRUCTION_TYPES = ["LEC", "SEM", "TUT", "LAB", "LLB", "LR", "REC", "DIS", "STU"];
+const PRECISE_CODE_RE = new RegExp(
+  "\\b[A-Z]{2,5}\\s?\\d{3}(?:\\s*/\\s*\\d{3})?\\s*[|/,:-]?\\s*(?:" + INSTRUCTION_TYPES.join("|") + ")\\b"
+);
+const COURSE_CODE_NOTE =
+  'Does not state the precise official subject code + instruction-type abbreviation together (e.g. "HIS 484 SEM") — it may only give a spelled-out equivalent. Informational only, not a compliance gap: verify this matches the department\'s official HUB catalog listing.';
+
+function checkPreciseCourseCode(firstPageText) {
+  return PRECISE_CODE_RE.test(firstPageText) ? null : COURSE_CODE_NOTE;
+}
+
+// ---- Required-element check, ported from check_syllabus.py / syllabus_standards.py ----
+function applicableLevels(element, levels) {
+  return levels.filter((l) => element.levels.includes(l));
+}
+function isRequired(element, levels) {
+  return levels.some((l) => element.requirement[l] === "required");
+}
+function firstSentence(text) {
+  text = text.trim();
+  const idx = text.indexOf(". ");
+  return idx !== -1 ? text.slice(0, idx + 1) : text;
+}
+function checkSyllabus(text, levels, elements) {
+  // grading-policy gets one extra, non-regex signal: an actual
+  // reconciled percentage grading table is at least as strong evidence
+  // this element exists as any of its plain-text detect patterns --
+  // see check_syllabus.py's check_syllabus() for the full rationale.
+  // Fixed 2026-09: a reconciled POINTS table (see checkPointsTotal) is
+  // exactly the same kind of evidence for a points-based syllabus, which
+  // otherwise had no equivalent signal at all.
+  const gradingWeightsOk = checkGradingWeights(text).status === "ok";
+  const pointsTotalOk = checkPointsTotal(text).status === "ok";
+
+  const missing = [];
+  for (const element of elements) {
+    if (applicableLevels(element, levels).length === 0) continue;
+    if (!isRequired(element, levels)) continue;
+    let detected = element.detect.some((pattern) => new RegExp(pattern, "i").test(text));
+    if (!detected && element.id === "grading-policy" && (gradingWeightsOk || pointsTotalOk)) {
+      detected = true;
+    }
+    if (!detected) {
+      missing.push({ title: element.title, reason: firstSentence(element.description) });
+    }
+  }
+  return missing;
+}
+
+// ---- Grading-weight-sums-to-100% check, ported from grading_check.py ----
+// See that module's docstring for why this is scoped to a located
+// "Grading" section rather than scanning the whole document (a
+// whole-document scan picks up unrelated percentages -- attendance
+// bonus thresholds, late-penalty deductions, Final Grade Scale cutoff
+// ranges, even pasted-in email MIME source in one real sample -- and
+// silently produces a confidently wrong total).
+// Fixed 2026-09: this originally required "Grading" (or "Grade") to be
+// the first word on the line, which never matches a heading phrased as
+// "Course Grading Policy" -- a real, common heading style where the
+// section name is prefixed with "Course". The optional (?:Course\s+)?
+// covers that without loosening the match for anything else.
+// Fixed 2026-09 (2): some real syllabi don't label this section with a
+// "Grading" heading at all -- they open it with a declarative sentence
+// instead, e.g. "Your grade will be determined according to the
+// following:" or "...following formula:". Two real graduate syllabi
+// (points-based, not percentage-based) used exactly this phrasing with
+// no "Grading" heading anywhere in the document, so without this second
+// alternative findGradingSection() returned null for them and neither
+// the percentage check nor the points-total check below could find
+// anything to scope their search to.
+const GRADING_SECTION_START_RE =
+  /(?:^|\n)[ \t]*(?:(?:Course\s+)?(?:Grading(?:\s+Policy)?|Grade\s+Breakdown|Grading\s+Scale)\s*:?[ \t]*|Your\s+grades?\s+will\s+be\s+(?:determined|calculated)(?:\s+according\s+to\s+the\s+following)?(?:\s+formula)?\s*:?[ \t]*)/i;
+// A line-starting "Total" immediately followed (after any whitespace)
+// by a digit closes a weight/points table -- see grading_check.py's
+// SECTION_STOP_RE comment for the full CHE 412 / BIO 351 rationale
+// (the digit requirement rejects a "Total" COLUMN HEADER and "(N
+// total)" parentheticals, neither of which precede a number).
+const GRADING_SECTION_STOP_RE = /(?:^|\n)[ \t]*(?:Course\s+Schedule|Weekly\s+Schedule|Course\s+Policies|UB\s+and\s+Classroom\s+Policies|Important\s+Dates|Week\s*1\b|Module\s*1\b|Total\b(?=\s*\d))/i;
+// Fixed 2026-09: checkPointsTotal() below needs the section to keep going
+// PAST a "Total ... N points" line instead of stopping right before it --
+// that line is the thing it's searching for, not a boundary to avoid. A
+// real syllabus phrased it "Total  <tabs>  100 points" (whitespace, not a
+// colon, between the label and the number), which the digit-lookahead
+// above treats identically to a percentage table's "Total 100%" and cuts
+// off right there, silently handing checkPointsTotal a section with no
+// total in it at all. Same start heading and same other stop phrases,
+// just without the Total/digit clause.
+const GRADING_SECTION_STOP_RE_KEEP_TOTAL = /(?:^|\n)[ \t]*(?:Course\s+Schedule|Weekly\s+Schedule|Course\s+Policies|UB\s+and\s+Classroom\s+Policies|Important\s+Dates|Week\s*1\b|Module\s*1\b)/i;
+// Sanity ceiling only, not a routine truncation -- see grading_check.py's
+// MAX_SECTION_CHARS comment: a real syllabus's Grading Policy section can
+// run well past a few thousand characters (per-category letter-grade
+// rubrics inline under each weight), and truncating anyway silently drops
+// later, real weight components from the sum.
+const GRADING_MAX_SECTION_CHARS = 20000;
+const RANGE_PCT_RE = /\d[\d.]*\s*[-–—]\s*\d[\d.]*\s*%/g;
+const PCT_RE = /(\d{1,3}(?:\.\d+)?)\s?%/g;
+const GRADING_TOLERANCE = 2.0;
+
+function findGradingSection(text, { keepTotalLine = false } = {}) {
+  const startMatch = GRADING_SECTION_START_RE.exec(text);
+  if (!startMatch) return null;
+  const start = startMatch.index + startMatch[0].length;
+  const stopRe = keepTotalLine ? GRADING_SECTION_STOP_RE_KEEP_TOTAL : GRADING_SECTION_STOP_RE;
+  const stopMatch = stopRe.exec(text.slice(start));
+  const relEnd = stopMatch ? stopMatch.index : GRADING_MAX_SECTION_CHARS;
+  const end = start + Math.min(relEnd, GRADING_MAX_SECTION_CHARS);
+  return text.slice(start, end);
+}
+
+function checkGradingWeights(text) {
+  const section = findGradingSection(text);
+  if (section === null) {
+    return {
+      status: "not_found",
+      percentages: [],
+      total: 0,
+      message: 'No "Grading" section heading found — could not check whether grade weights sum to 100%.',
+    };
+  }
+
+  const excludedSpans = [];
+  let rm;
+  const rangeRe = new RegExp(RANGE_PCT_RE.source, "g");
+  while ((rm = rangeRe.exec(section)) !== null) {
+    excludedSpans.push([rm.index, rm.index + rm[0].length]);
+  }
+  const inExcludedSpan = (pos) => excludedSpans.some(([s, e]) => pos >= s && pos < e);
+
+  const percentages = [];
+  let pm;
+  const pctRe = new RegExp(PCT_RE.source, "g");
+  while ((pm = pctRe.exec(section)) !== null) {
+    if (inExcludedSpan(pm.index)) continue;
+    const before = section.slice(Math.max(0, pm.index - 20), pm.index);
+    const after = section.slice(pm.index + pm[0].length, pm.index + pm[0].length + 10);
+    if (/^\s*[A-F][+-]?\b(?!\w)/.test(after)) continue;
+    // A per-item breakdown of a component already counted, not a
+    // separate additive component -- "each" can land on either side of
+    // the percentage depending on phrasing ("12.5% each" vs. "each 4%").
+    if (/^\s*each\b/i.test(after) || /each\s*$/i.test(before)) continue;
+    // "...will count for half of one percentage point out of the
+    // TOTAL 15%" -- a restatement of a weight already counted under
+    // its own heading a sentence earlier, not a second component.
+    if (/total\s*$/i.test(before)) continue;
+    percentages.push(parseFloat(pm[1]));
+  }
+
+  if (percentages.length < 2) {
+    return {
+      status: "not_found",
+      percentages,
+      total: percentages.reduce((a, b) => a + b, 0),
+      message: 'Found a "Grading" section but no clear percentage-based weight breakdown (this syllabus may use a points-based scale instead).',
+    };
+  }
+
+  const total = percentages.reduce((a, b) => a + b, 0);
+  const foundStr = percentages.map((p) => `${p}%`).join(", ");
+  if (Math.abs(total - 100) <= GRADING_TOLERANCE) {
+    return { status: "ok", percentages, total, message: `Grading weight percentages sum to ${total}% (found: ${foundStr}).` };
+  }
+  return {
+    status: "mismatch",
+    percentages,
+    total,
+    message: `Grading weight percentages sum to ${total}%, not 100% (found: ${foundStr}) — verify against the syllabus; a component may be missing, misstated, or this tool may have mis-scoped the grading section.`,
+  };
+}
+
+// ---- Points-total check: not every syllabus grades by percentage. Added
+// 2026-09 after testing against two real points-based graduate syllabi
+// where every component is stated in points and the section ends with an
+// explicit grand total (e.g. "Total points 133"), never a percentage.
+// checkGradingWeights() correctly reports "not_found" for these (there's
+// nothing wrong with grading by points), but that leaves points-based
+// syllabi with no equivalent sanity check at all. This mirrors
+// checkGradingWeights()'s approach -- scope to the located grading
+// section, then verify the listed components actually add up -- but
+// checks against whatever total the syllabus itself states instead of
+// assuming 100.
+//
+// Matched in order; first pattern that hits in the section wins. Each
+// covers a real phrasing seen in testing or a common documented variant:
+//   1. "Total points 133" / "Total Points: 133"      (label, then number)
+//   2. "Total ... 100 points"                         (label ... number, "points")
+//   3. "points possible: 100" / "100 points possible"
+//   4. "out of 100 points" / "maximum of 100 points"
+const TOTAL_POINTS_PATTERNS = [
+  /(?:^|\n)[ \t]*Total\s+Points?\s*:?[ \t]*(\d+(?:\.\d+)?)/i,
+  /(?:^|\n)[ \t]*Total\s*:?[ \t]{0,40}(\d+(?:\.\d+)?)[ \t]*points?\b/i,
+  /points?\s+possible\s*:?[ \t]*(\d+(?:\.\d+)?)/i,
+  /(\d+(?:\.\d+)?)[ \t]*points?\s+possible\b/i,
+  /(?:out\s+of|maximum\s+of)[ \t]*(\d+(?:\.\d+)?)[ \t]*points?\b/i,
+];
+
+function findStatedPointsTotal(section) {
+  for (const re of TOTAL_POINTS_PATTERNS) {
+    const m = re.exec(section);
+    if (m) return { value: parseFloat(m[1]), index: m.index };
+  }
+  return null;
+}
+
+function checkPointsTotal(text) {
+  const section = findGradingSection(text, { keepTotalLine: true });
+  if (section === null) {
+    return {
+      status: "not_found",
+      components: [],
+      total: 0,
+      statedTotal: null,
+      message: 'No "Grading" section found — could not check whether point values sum to a stated total.',
+    };
+  }
+
+  const statedTotal = findStatedPointsTotal(section);
+  if (!statedTotal) {
+    return {
+      status: "not_found",
+      components: [],
+      total: 0,
+      statedTotal: null,
+      message: 'Found a grading section but no stated point total (e.g. "Total points: 100") — this syllabus may use percentage-based weights instead.',
+    };
+  }
+
+  // Only look at components listed BEFORE the stated total, same reasoning
+  // as checkGradingWeights()'s "total$" exclusion: text after the total
+  // (grade scale cutoffs, rubric appendices restating "/10" subtotals for
+  // an individual assignment) is not part of the top-level breakdown.
+  const componentsText = section.slice(0, statedTotal.index);
+  const components = [];
+  const ptsRe = /(\d+(?:\.\d+)?)\s*points?\b/gi;
+  let pm;
+  while ((pm = ptsRe.exec(componentsText)) !== null) {
+    const after = componentsText.slice(pm.index + pm[0].length, pm.index + pm[0].length + 10);
+    // "3 points each (30 points total)" -- "3 points" is a per-unit rate,
+    // not a contribution; the "(30 points total)" restatement right after
+    // it is the actual line-item contribution and IS counted.
+    if (/^\s*each\b/i.test(after)) continue;
+    components.push(parseFloat(pm[1]));
+  }
+
+  const total = components.reduce((a, b) => a + b, 0);
+  const foundStr = components.map((p) => String(p)).join(", ");
+  if (Math.abs(total - statedTotal.value) <= 0.5) {
+    return {
+      status: "ok",
+      components,
+      total,
+      statedTotal: statedTotal.value,
+      message: `Point values sum to ${total}, matching the stated total of ${statedTotal.value} (found: ${foundStr}).`,
+    };
+  }
+  return {
+    status: "mismatch",
+    components,
+    total,
+    statedTotal: statedTotal.value,
+    message: `Point values sum to ${total}, not the stated total of ${statedTotal.value} (found: ${foundStr}) — verify against the syllabus; a component may be missing, misstated, or this tool may have mis-scoped the grading section.`,
+  };
+}
+
+// ---- Degraded PDF/UA-ish accessibility check ----
+function walkStructTree(node, cb) {
+  if (!node) return;
+  cb(node);
+  for (const child of node.children || []) walkStructTree(child, cb);
+}
+
+async function bytesContainLangKey(arrayBuffer) {
+  // Approximate, whole-file byte scan for a /Lang key -- pdf.js has no
+  // direct accessor for the document Catalog's /Lang entry (only XMP
+  // metadata fields), so this substitutes a loose regex over the raw
+  // PDF bytes, in the same spirit as this repo's other "loose regex"
+  // heuristic checks. Can false-negative on a compressed object stream
+  // (a /Lang key inside a compressed xref/object stream won't appear as
+  // literal bytes) and can't confirm the key is on the actual Catalog
+  // rather than some unrelated dictionary -- flagged as approximate in
+  // the UI for this reason.
+  const bytes = new Uint8Array(arrayBuffer);
+  let text = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    text += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return /\/Lang\s*[(/]/.test(text);
+}
+
+async function accessibilityCheck(pdf, arrayBuffer, startPage) {
+  const findings = [];
+
+  const markInfo = await pdf.getMarkInfo().catch(() => null);
+  if (!markInfo || !markInfo.Marked) {
+    findings.push({ label: "PDF is not flagged as a tagged PDF at all", count: 1 });
+  }
+
+  const meta = await pdf.getMetadata().catch(() => null);
+  const title = meta?.info?.Title || meta?.metadata?.get?.("dc:title");
+  if (!title || !String(title).trim()) {
+    findings.push({ label: "Document has no title set in its metadata", count: 1 });
+  }
+
+  const hasLang = await bytesContainLangKey(arrayBuffer);
+  if (!hasLang) {
+    findings.push({ label: "Document does not appear to declare a language (approximate check)", count: 1 });
+  }
+
+  let linkNoDesc = 0;
+  let missingAlt = 0;
+  let tableMismatch = 0;
+
+  for (let i = startPage; i < pdf.numPages; i++) {
+    const page = await pdf.getPage(i + 1);
+
+    const annots = await page.getAnnotations().catch(() => []);
+    for (const a of annots) {
+      if (a.subtype === "Link") {
+        const hasDesc = (a.contents && a.contents.trim()) || (a.alternativeText && a.alternativeText.trim());
+        if (!hasDesc) linkNoDesc++;
+      }
+    }
+
+    const tree = await page.getStructTree().catch(() => null);
+    if (tree) {
+      walkStructTree(tree, (node) => {
+        const role = node.role || "";
+        if (/Figure/i.test(role)) {
+          if (!node.alt || !String(node.alt).trim()) missingAlt++;
+        }
+        if (/^Table$/i.test(role)) {
+          // TR rows sit under THead/TBody/TFoot wrapper nodes, not
+          // directly under Table -- collect them from anywhere among
+          // Table's descendants rather than only direct children.
+          const rows = [];
+          walkStructTree(node, (n) => {
+            if (/^TR$/i.test(n.role || "")) rows.push(n);
+          });
+          const rowCounts = rows
+            .map((tr) => (tr.children || []).filter((c) => /^T[DH]$/i.test(c.role || "")).length)
+            .filter((n) => n > 0);
+          if (new Set(rowCounts).size > 1) tableMismatch++;
+        }
+      });
+    }
+  }
+
+  if (linkNoDesc > 0) findings.push({ label: "Hyperlink(s) have no accessible description text", count: linkNoDesc });
+  if (missingAlt > 0) findings.push({ label: "Image/figure(s) missing an alt-text description", count: missingAlt });
+  if (tableMismatch > 0) findings.push({ label: "Table structure is malformed (inconsistent column counts per row)", count: tableMismatch });
+
+  return findings;
+}
+
+// ---- Rendering ----
+function courseLabel(filename) {
+  const stem = filename.replace(/\.pdf$/i, "");
+  const idx = stem.indexOf("_");
+  if (idx === -1) return stem;
+  return `${stem.slice(0, idx).trim()} — ${stem.slice(idx + 1).trim()}`;
+}
+
+function el(tag, opts = {}, children = []) {
+  const node = document.createElement(tag);
+  if (opts.text !== undefined) node.textContent = opts.text;
+  if (opts.className) node.className = opts.className;
+  for (const [k, v] of Object.entries(opts.attrs || {})) node.setAttribute(k, v);
+  for (const child of children) node.appendChild(child);
+  return node;
+}
+
+function renderResults(courses) {
+  resultsSection.innerHTML = "";
+  resultsSection.hidden = false;
+
+  resultsSection.appendChild(el("h2", { text: "Summary" }));
+  const table = el("table", { className: "summary-table" });
+  const thead = el("thead", {}, [
+    el("tr", {}, [
+      el("th", { text: "Course", attrs: { scope: "col" } }),
+      el("th", { text: "Missing required elements", attrs: { scope: "col" } }),
+      el("th", { text: "Grading weights", attrs: { scope: "col" } }),
+      el("th", { text: "Points total", attrs: { scope: "col" } }),
+      el("th", { text: "Accessibility issues", attrs: { scope: "col" } }),
+    ]),
+  ]);
+  table.appendChild(thead);
+  const tbody = el("tbody");
+  const gradingLabels = { ok: "sum to 100%", mismatch: "does NOT sum to 100%", not_found: "n/a" };
+  const pointsLabels = { ok: "matches stated total", mismatch: "does NOT match stated total", not_found: "n/a" };
+  for (const c of courses) {
+    const accCount = c.error ? 0 : c.accessibilityFindings.reduce((s, f) => s + f.count, 0);
+    tbody.appendChild(
+      el("tr", {}, [
+        el("td", { text: c.label }),
+        el("td", { text: c.error ? "n/a" : String(c.missingRequired.length) }),
+        el("td", { text: c.error ? "n/a" : gradingLabels[c.gradingCheck.status] }),
+        el("td", { text: c.error ? "n/a" : pointsLabels[c.pointsCheck.status] }),
+        el("td", { text: c.error ? "n/a" : c.isDocx ? "n/a" : String(accCount) }),
+      ])
+    );
+  }
+  table.appendChild(tbody);
+  resultsSection.appendChild(table);
+
+  for (const c of courses) {
+    const block = el("div", { className: "course-block" });
+    block.appendChild(el("h2", { text: c.label }));
+
+    if (c.error) {
+      block.appendChild(el("p", { text: "Could not be checked: " + c.error }));
+      resultsSection.appendChild(block);
+      continue;
+    }
+
+    block.appendChild(
+      el("p", {
+        className: "page-info",
+        text: c.isDocx
+          ? "Format: .docx (no page structure)."
+          : `Cover form: page(s) 1–${c.startPage}; syllabus content: page(s) ${c.startPage + 1}–${c.totalPages}.`,
+      })
+    );
+    block.appendChild(el("p", { className: "page-info", text: c.levelsReason }));
+
+    block.appendChild(el("h3", { text: "Missing / Incomplete Syllabus Elements" }));
+    if (c.missingRequired.length) {
+      const ul = el("ul", { className: "finding-list" });
+      for (const item of c.missingRequired) {
+        ul.appendChild(
+          el("li", {}, [el("strong", { text: item.title + ": " }), document.createTextNode(item.reason)])
+        );
+      }
+      block.appendChild(ul);
+    } else {
+      block.appendChild(el("p", { text: "No required elements missing." }));
+    }
+
+    if (c.gradingCheck.status !== "not_found") {
+      block.appendChild(el("h3", { text: "Grading Weight Check" }));
+      block.appendChild(el("p", { text: c.gradingCheck.message }));
+    }
+
+    if (c.pointsCheck.status !== "not_found") {
+      block.appendChild(el("h3", { text: "Points Total Check" }));
+      block.appendChild(el("p", { text: c.pointsCheck.message }));
+    }
+
+    if (c.codeNote) {
+      block.appendChild(el("h3", { text: "Course Code Format (informational)" }));
+      block.appendChild(el("p", { text: c.codeNote }));
+    }
+
+    block.appendChild(el("h3", { text: "PDF Accessibility (ADA / PDF-UA) Issues — degraded check" }));
+    if (c.accessibilityNote) {
+      block.appendChild(el("p", { text: c.accessibilityNote }));
+    } else if (c.accessibilityFindings.length) {
+      const ul = el("ul", { className: "finding-list" });
+      for (const f of c.accessibilityFindings) {
+        ul.appendChild(
+          el("li", {}, [
+            document.createTextNode(f.label + " "),
+            el("span", { className: "count-tag", text: `(${f.count} occurrence(s))` }),
+          ])
+        );
+      }
+      block.appendChild(ul);
+    } else {
+      block.appendChild(el("p", { text: "No accessibility issues detected in the syllabus pages (degraded check)." }));
+    }
+
+    resultsSection.appendChild(block);
+  }
+
+  resultsSection.appendChild(
+    el("button", { text: "Download report (.docx)", className: "secondary", attrs: { type: "button", id: "download-btn" } })
+  );
+  document.getElementById("download-btn").addEventListener("click", () => downloadDocx(courses));
+}
+
+// ---- docx generation ----
+async function buildDocx(courses) {
+  const children = [];
+  children.push(new Paragraph({ text: "Graduate Syllabus Review", heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }));
+  children.push(
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: `Required-element and PDF accessibility findings — ${courses.length} course(s)`, italics: true })],
+    })
+  );
+  children.push(
+    new Paragraph({
+      text:
+        "Scope: syllabus content only, checked against UB's Graduate Course Syllabus Guidelines. " +
+        "Each PDF's “New Graduate Course Approval Request Form” cover pages are excluded from both checks. " +
+        "This browser-based tool runs a heuristic content check plus a DEGRADED accessibility screen " +
+        "(no full PDF/UA-1 validation) — confirm findings against the actual document before acting on them.",
+    })
+  );
+
+  children.push(new Paragraph({ text: "Summary", heading: HeadingLevel.HEADING_1 }));
+  const gradingLabels = { ok: "sum to 100%", mismatch: "does NOT sum to 100%", not_found: "n/a" };
+  const pointsLabels = { ok: "matches stated total", mismatch: "does NOT match stated total", not_found: "n/a" };
+  const headerRow = new TableRow({
+    children: ["Course", "Missing required elements", "Grading weights", "Points total", "Accessibility issues"].map(
+      (t) => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: t, bold: true })] })] })
+    ),
+  });
+  const dataRows = courses.map((c) => {
+    const accCount = c.error ? 0 : c.accessibilityFindings.reduce((s, f) => s + f.count, 0);
+    return new TableRow({
+      children: [
+        c.label,
+        c.error ? "n/a" : String(c.missingRequired.length),
+        c.error ? "n/a" : gradingLabels[c.gradingCheck.status],
+        c.error ? "n/a" : pointsLabels[c.pointsCheck.status],
+        c.error ? "n/a" : c.isDocx ? "n/a" : String(accCount),
+      ].map((t) => new TableCell({ children: [new Paragraph(t)] })),
+    });
+  });
+  children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [headerRow, ...dataRows] }));
+
+  for (const c of courses) {
+    children.push(new Paragraph({ text: c.label, heading: HeadingLevel.HEADING_1 }));
+    if (c.error) {
+      children.push(new Paragraph("Could not be checked: " + c.error));
+      continue;
+    }
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            italics: true,
+            text: c.isDocx
+              ? "Format: .docx (no page structure)."
+              : `Cover form: page(s) 1–${c.startPage}; syllabus content: page(s) ${c.startPage + 1}–${c.totalPages}.`,
+          }),
+        ],
+      })
+    );
+    children.push(new Paragraph({ children: [new TextRun({ italics: true, text: c.levelsReason })] }));
+
+    children.push(new Paragraph({ text: "Missing / Incomplete Syllabus Elements", heading: HeadingLevel.HEADING_2 }));
+    if (c.missingRequired.length) {
+      for (const item of c.missingRequired) {
+        children.push(
+          new Paragraph({
+            bullet: { level: 0 },
+            children: [new TextRun({ text: item.title + ": ", bold: true }), new TextRun(item.reason)],
+          })
+        );
+      }
+    } else {
+      children.push(new Paragraph("No required elements missing."));
+    }
+
+    if (c.gradingCheck.status !== "not_found") {
+      children.push(new Paragraph({ text: "Grading Weight Check", heading: HeadingLevel.HEADING_2 }));
+      children.push(new Paragraph(c.gradingCheck.message));
+    }
+
+    if (c.pointsCheck.status !== "not_found") {
+      children.push(new Paragraph({ text: "Points Total Check", heading: HeadingLevel.HEADING_2 }));
+      children.push(new Paragraph(c.pointsCheck.message));
+    }
+
+    if (c.codeNote) {
+      children.push(new Paragraph({ text: "Course Code Format (informational)", heading: HeadingLevel.HEADING_2 }));
+      children.push(new Paragraph(c.codeNote));
+    }
+
+    children.push(new Paragraph({ text: "PDF Accessibility (ADA / PDF-UA) Issues — degraded check", heading: HeadingLevel.HEADING_2 }));
+    if (c.accessibilityNote) {
+      children.push(new Paragraph(c.accessibilityNote));
+    } else if (c.accessibilityFindings.length) {
+      for (const f of c.accessibilityFindings) {
+        children.push(
+          new Paragraph({
+            bullet: { level: 0 },
+            children: [new TextRun(f.label + " "), new TextRun({ text: `(${f.count} occurrence(s))`, italics: true })],
+          })
+        );
+      }
+    } else {
+      children.push(new Paragraph("No accessibility issues detected in the syllabus pages (degraded check)."));
+    }
+  }
+
+  const doc = new Document({ sections: [{ children }] });
+  return Packer.toBlob(doc);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadDocx(courses) {
+  setStatus("Building .docx report…");
+  try {
+    const blob = await buildDocx(courses);
+    downloadBlob(blob, "syllabus_review_report.docx");
+    setStatus("Report downloaded.");
+  } catch (err) {
+    console.error(err);
+    setStatus("Could not build the .docx report: " + err.message, true);
+  }
+}
+
+// ---- Per-file-type extraction ----
+async function processPdf(file) {
+  const buf = await file.arrayBuffer();
+  // pdf.js takes ownership of (detaches) the ArrayBuffer passed to
+  // getDocument -- pass it a copy so `buf` stays readable afterward for
+  // accessibilityCheck's own raw-byte language scan.
+  const { pdf, pages } = await loadPdfPages(buf.slice(0));
+  const startPage = findSyllabusStartPage(pages);
+  const syllabusText = pages.slice(startPage).join("\n");
+  return {
+    syllabusText,
+    startPage,
+    totalPages: pdf.numPages,
+    firstPageForLevel: pages[startPage] || "",
+    pdf,
+    buf,
+  };
+}
+
+async function processDocx(file) {
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buf });
+  const fullText = result.value;
+  // A .docx has no page structure to split on the way a PDF does; cover-form
+  // detection still runs (harmless if this isn't a Grad School approval
+  // packet -- findSyllabusStartPage only skips pages that open with the
+  // form's own title, so an ordinary syllabus is left untouched at index 0).
+  const pages = [fullText];
+  const startPage = findSyllabusStartPage(pages);
+  const syllabusText = pages.slice(startPage).join("\n");
+  return {
+    syllabusText,
+    startPage,
+    totalPages: 1,
+    firstPageForLevel: syllabusText.slice(0, 2000),
+  };
+}
+
+// ---- Orchestration ----
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const files = Array.from(fileInput.files || []);
+  if (!files.length) {
+    setStatus("Choose at least one PDF or .docx file first.", true);
+    return;
+  }
+  const autoMode = document.getElementById("level-mode-auto").checked;
+  let manualLevels = [];
+  if (!autoMode) {
+    if (document.getElementById("level-undergraduate").checked) manualLevels.push("undergraduate");
+    if (document.getElementById("level-graduate").checked) manualLevels.push("graduate");
+    if (!manualLevels.length) {
+      setStatus("Choose at least one policy level.", true);
+      return;
+    }
+  }
+
+  checkBtn.disabled = true;
+  resultsSection.hidden = true;
+  try {
+    setStatus("Loading policy standards…");
+    const { elements } = await loadStandards();
+
+    const courses = [];
+    for (const file of files) {
+      setStatus(`Processing ${file.name}…`);
+      try {
+        const isDocx = /\.docx$/i.test(file.name);
+        const extracted = isDocx ? await processDocx(file) : await processPdf(file);
+
+        let levels, levelsReason;
+        if (autoMode) {
+          ({ levels, reason: levelsReason } = detectCourseLevels(extracted.firstPageForLevel, file.name));
+        } else {
+          levels = manualLevels;
+          levelsReason = "Manually set to: " + manualLevels.join(", ") + ".";
+        }
+
+        const missingRequired = checkSyllabus(extracted.syllabusText, levels, elements);
+        const gradingCheck = checkGradingWeights(extracted.syllabusText);
+        const pointsCheck = checkPointsTotal(extracted.syllabusText);
+        const codeNote = checkPreciseCourseCode(extracted.firstPageForLevel);
+
+        let accessibilityFindings = [];
+        let accessibilityNote = null;
+        if (isDocx) {
+          accessibilityNote =
+            "Not available for .docx files — PDF/UA is a PDF-specific accessibility standard. Export to PDF to run this check.";
+        } else {
+          accessibilityFindings = await accessibilityCheck(extracted.pdf, extracted.buf, extracted.startPage);
+        }
+
+        courses.push({
+          label: courseLabel(file.name),
+          isDocx,
+          startPage: extracted.startPage,
+          totalPages: extracted.totalPages,
+          levelsReason,
+          missingRequired,
+          gradingCheck,
+          pointsCheck,
+          codeNote,
+          accessibilityFindings,
+          accessibilityNote,
+        });
+      } catch (err) {
+        console.error(err);
+        courses.push({ label: courseLabel(file.name), error: err.message });
+      }
+    }
+
+    lastCourses = courses;
+    renderResults(courses);
+    setStatus(`Done — checked ${courses.length} file(s).`);
+  } catch (err) {
+    console.error(err);
+    setStatus("Something went wrong: " + err.message, true);
+  } finally {
+    checkBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
